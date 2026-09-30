@@ -1,0 +1,4 @@
+interface:
+  display_name: "nitpick code review"
+  short_description: "Second-opinion review of your diff before a PR"
+  default_prompt: "Run nitpick on my changes and fix what it finds."

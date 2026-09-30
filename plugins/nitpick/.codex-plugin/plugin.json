@@ -1,0 +1,25 @@
+{
+  "name": "nitpick",
+  "version": "0.1.0",
+  "description": "AI code review for AI agents: run nitpick before opening a PR and loop until the review is clean.",
+  "author": { "name": "LVTD LLC", "url": "https://lvtd.dev" },
+  "homepage": "https://nitpick.sh",
+  "repository": "https://github.com/LVTD-LLC/nitpick-skills",
+  "license": "MIT",
+  "keywords": ["code-review", "pull-request", "openrouter", "ollama", "agents"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "nitpick",
+    "shortDescription": "Second-opinion code review before you open a PR.",
+    "longDescription": "Runs the nitpick CLI on your git diff: it sends the change plus the relevant repo context to a different model (OpenRouter or local) and returns structured findings. The skill installs nitpick, runs it, fixes what it finds, and reruns until the review is clean.",
+    "developerName": "LVTD LLC",
+    "category": "Coding",
+    "capabilities": ["Code review"],
+    "websiteURL": "https://nitpick.sh",
+    "defaultPrompt": [
+      "Run nitpick on my changes and fix what it finds.",
+      "Get a second-opinion review of this diff before I open the PR.",
+      "Install nitpick and set it up for this repo."
+    ]
+  }
+}

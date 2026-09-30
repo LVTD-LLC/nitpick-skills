@@ -1,0 +1,12 @@
+{
+  "name": "nitpick-skills",
+  "description": "Official nitpick plugin: AI code review for AI agents.",
+  "owner": { "name": "LVTD LLC", "url": "https://lvtd.dev" },
+  "plugins": [
+    {
+      "name": "nitpick",
+      "source": "./plugins/nitpick",
+      "description": "Run nitpick before opening a PR and loop until the review is clean."
+    }
+  ]
+}
