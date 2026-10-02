@@ -1,6 +1,6 @@
 # .nitpick.toml
 
-Lives in the repo root. Every key is optional. CLI flags and `NITPICK_*` environment variables override it.
+Lives in the repo root. Every key is optional. CLI flags and `NITPICK_*` environment variables override it. A user-level `~/.config/nitpick/config.toml` with the same keys is read first and the repo file is layered over it; `api_key = "..."` is honored only in the user-level file.
 
 ```toml
 # One model or a list. Several run in parallel and their findings are merged.
@@ -33,6 +33,20 @@ instructions = """
 This is a Django app. Be strict about N+1 queries and missing select_related.
 Ignore anything about docstrings.
 """
+
+# Background review while an agent works (nitpick watch). Unset keys fall back to the values above.
+[watch]
+# enabled = true
+# model = "nvidia/nemotron-3-ultra-550b-a55b:free"   # cheaper model for the many small reviews
+deliver = "medium"        # lowest severity handed to the agent mid-task
+# fail_on = "high"        # lowest severity that sends the agent back when it tries to stop
+debounce_secs = 20        # quiet period after the last edit before a review starts
+max_wait_secs = 120       # review anyway once edits have been arriving for this long
+timeout_secs = 180
+# budget_tokens = 40000
+# stop_wait_secs = 120    # how long the stop hook waits for a review in flight
+# max_stop_blocks = 2     # how many times in a row the stop hook may send the agent back
+# instructions = "Extra instructions for the background reviewer only."
 ```
 
 `nitpick init` writes a commented starter file.

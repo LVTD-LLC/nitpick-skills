@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "nitpick hook cursor session-start",
+        "timeout": 30
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "nitpick hook cursor tool",
+        "timeout": 30
+      }
+    ],
+    "stop": [
+      {
+        "command": "nitpick hook cursor stop",
+        "timeout": 600,
+        "loop_limit": 3
+      }
+    ]
+  }
+}

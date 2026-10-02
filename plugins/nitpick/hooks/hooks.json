@@ -1,0 +1,49 @@
+{
+  "description": "nitpick watch: background code review of the agent's edits. Each hook runs `nitpick hook ...`, which returns in milliseconds; reviews happen in a detached worker. Needs the nitpick binary on PATH and NITPICK_OPENROUTER_API_KEY (or a local model).",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nitpick hook claude session-start",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nitpick hook claude tool",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nitpick hook claude prompt",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nitpick hook claude stop",
+            "timeout": 600
+          }
+        ]
+      }
+    ]
+  }
+}

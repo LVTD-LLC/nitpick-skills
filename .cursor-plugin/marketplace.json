@@ -6,7 +6,7 @@
     {
       "name": "nitpick",
       "source": "./plugins/nitpick",
-      "description": "Run nitpick before opening a PR and loop until the review is clean."
+      "description": "Background code review of the agent's edits, plus a skill to run nitpick before opening a PR."
     }
   ]
 }

@@ -1,11 +1,14 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "nitpick",
-  "version": "0.1.0",
-  "description": "AI code review for AI agents: run nitpick before opening a PR and loop until the review is clean.",
+  "version": "0.2.0",
+  "description": "AI code review for AI agents: a background reviewer that checks the agent's edits as it works, plus a skill to run nitpick before opening a PR and loop until the review is clean.",
   "author": { "name": "LVTD LLC", "url": "https://lvtd.dev" },
   "homepage": "https://nitpick.sh",
   "repository": "https://github.com/LVTD-LLC/nitpick-skills",
   "license": "MIT",
-  "keywords": ["code-review", "pull-request", "openrouter", "ollama", "agents"]
+  "keywords": ["code-review", "pull-request", "openrouter", "ollama", "agents"],
+  "extensions": {
+    "com.openai": { "hooks": "./hooks/codex-hooks.json" }
+  }
 }

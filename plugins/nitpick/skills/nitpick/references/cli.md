@@ -5,6 +5,8 @@ nitpick [OPTIONS] [PATHS]...        review (default)
 nitpick review [OPTIONS] [PATHS]... same as above
 nitpick context [OPTIONS] [PATHS]... print the payload that would be sent, no model call
 nitpick init [--force]              write a starter .nitpick.toml
+nitpick watch <subcommand>          background review driven by the agent's hooks (below)
+nitpick hook <harness> <event>      entry point the hooks call; not for humans
 ```
 
 ## Options
@@ -34,9 +36,24 @@ nitpick init [--force]              write a starter .nitpick.toml
 | `-q, --quiet` | No progress on stderr | |
 | `-v, --verbose` | Timing and token details on stderr | |
 
+## Watch
+
+| Command | Meaning |
+|---|---|
+| `nitpick watch install <harness> [--global]` | Add the hooks. Harness: `claude`, `codex`, `cursor`, `pi`, `opencode`, `openclaw`. Project-level unless `--global`. |
+| `nitpick watch uninstall <harness> [--global]` | Remove them |
+| `nitpick watch status` | Enabled?, model, thresholds, worker state, unreviewed files, waiting findings, recent log |
+| `nitpick watch log [-n N] [--json]` | Findings of past background reviews, newest first |
+| `nitpick watch run [--json]` | Review everything unreviewed now, in the foreground; exit 1 at or above `[watch].fail_on` |
+| `nitpick watch reset` | Forget baselines and queued findings for this checkout |
+| `nitpick watch show <harness>` | Print the hook definitions (or shim) `install` would write |
+| `nitpick hook <harness> <event> [--cwd DIR] [--tool NAME]` | Called by hooks. Events: `session-start`, `tool`, `prompt`, `stop`. `generic` prints `{"context","block","reason","note"}` for custom integrations. |
+
+State lives in `<git-dir>/nitpick/` (per worktree, ignored by git).
+
 ## Environment variables
 
-`NITPICK_OPENROUTER_API_KEY`, `OPENROUTER_API_KEY`, `NITPICK_OPENAI_API_KEY`, `OPENAI_API_KEY`, `NITPICK_API_KEY`, `NITPICK_MODEL`, `NITPICK_PROVIDER`, `NITPICK_BASE_URL`, `NITPICK_REASONING`, `NITPICK_DEBUG_DIR`.
+`NITPICK_OPENROUTER_API_KEY`, `OPENROUTER_API_KEY`, `NITPICK_OPENAI_API_KEY`, `OPENAI_API_KEY`, `NITPICK_API_KEY`, `NITPICK_MODEL`, `NITPICK_PROVIDER`, `NITPICK_BASE_URL`, `NITPICK_REASONING`, `NITPICK_DEBUG_DIR`, `NITPICK_WATCH=0` (disable watch for a session).
 
 ## Exit codes
 
