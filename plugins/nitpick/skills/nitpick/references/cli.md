@@ -49,7 +49,11 @@ nitpick hook <harness> <event>      entry point the hooks call; not for humans
 | `nitpick watch show <harness>` | Print the hook definitions (or shim) `install` would write |
 | `nitpick hook <harness> <event> [--cwd DIR] [--tool NAME]` | Called by hooks. Events: `session-start`, `tool`, `prompt`, `stop`. `generic` prints `{"context","block","reason","note"}` for custom integrations. |
 
-State lives in `<git-dir>/nitpick/` (per worktree, ignored by git).
+State lives in `<git-dir>/nitpick/` (per worktree, ignored by git), or `~/.local/state/nitpick/workspaces/` for a plain working folder. Outside Git, watch reviews changed source files without related context.
+
+Stop is advisory by default: no waiting or blocking. Set `[watch].max_stop_blocks = 2` to opt into a completion gate. Late findings wait for the next prompt or tool call. The Stop hook's 600-second timeout accommodates the opt-in blocking gate; it does not make advisory stop wait.
+
+For Codex machine-wide setup use `nitpick watch install codex --global`, then restart Codex and enable AND trust all four hooks under **User config** in `/hooks` or desktop Hooks settings. The plugin alone is not proof of hook discovery. Reinstall preserves existing definitions and trust; it does not activate previously disabled entries. Keep only one active nitpick set across global, project, and plugin sources.
 
 ## Environment variables
 

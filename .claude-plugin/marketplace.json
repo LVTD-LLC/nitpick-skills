@@ -8,7 +8,7 @@
       "name": "nitpick",
       "source": "./plugins/nitpick",
       "description": "Background code review of the agent's edits, plus a skill to run nitpick before opening a PR.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": { "name": "LVTD LLC" },
       "homepage": "https://nitpick.sh",
       "repository": "https://github.com/LVTD-LLC/nitpick-skills",

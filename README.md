@@ -2,7 +2,7 @@
 
 Plugin and skill for installing and using [nitpick](https://github.com/LVTD-LLC/nitpick), AI code review for AI agents, inside coding-agent harnesses: Claude Code, OpenAI Codex, Cursor, OpenClaw, OpenCode, pi, and anything else that reads Agent Skills.
 
-Two things ship here. **Hooks** that make nitpick review in the background while the agent works: each batch of edits is reviewed by a different model and findings reach the agent as a `[nitpick]` note, with a stop hook that sends the agent back for anything high or blocker. And a **skill** that teaches the agent to install nitpick, run it before opening a PR, and act on findings.
+Two things ship here. **Hooks** that make nitpick review in the background while the agent works: each batch of edits is reviewed by a different model and findings reach the agent as a `[nitpick]` note, with an advisory stop hook that returns immediately (blocking on serious findings is opt-in). And a **skill** that teaches the agent to install nitpick, run it before opening a PR, and act on findings.
 
 This repository is one plugin directory that is valid in every format at once:
 
@@ -20,14 +20,15 @@ Hooks are harness-specific and live in `plugins/nitpick/hooks/`: `hooks.json` (C
 
 Do these in order.
 
-1. Install the binary if `nitpick --version` fails:
+1. Check `nitpick --version` and `nitpick watch --help`. Install the binary if absent:
    ```bash
    brew install LVTD-LLC/tap/nitpick
    ```
    or, without Homebrew, `cargo install --git https://github.com/LVTD-LLC/nitpick` (needs Rust 1.98+).
+   If already installed, check for an upgrade with your package manager (`brew update && brew upgrade nitpick` for Homebrew, or rerun `cargo install --git https://github.com/LVTD-LLC/nitpick --force`). A working old binary is not necessarily current.
 2. Install this skill into your harness using the matching section below, or run `./install.sh` from a clone of this repo, which does step 1 and links the skill into `~/.agents/skills/` and `~/.claude/skills/`.
-3. Make sure `NITPICK_OPENROUTER_API_KEY` is exported, or a local Ollama / llama.cpp server is running. Ask the user if neither is true. Never write the key into a file.
-4. If you installed a plugin in Claude Code or Codex, the background-review hooks are already in place (Codex asks the user to trust them once via `/hooks`). Otherwise run `nitpick watch install <harness>` for the harness you are in.
+3. Configure provider access for the hook environment. GUI apps may not inherit shell exports: the user-level `~/.config/nitpick/config.toml` supports `api_key`, with file mode `600`. Ask the user to configure it, or obtain explicit permission before securely saving an existing key; never print it or put it in a repository. A local Ollama / llama.cpp server needs no key.
+4. For Codex, explicitly run `nitpick watch install codex --global`, even after plugin installation. Restart Codex and enable AND trust the four hooks under **User config** in `/hooks` or desktop Hooks settings. Use one active set; disable plugin duplicates or uninstall project-local duplicates after global activation. For other harnesses use `nitpick watch install <harness> --global` (Claude Code already loads the plugin hooks). Omit `--global` only for an explicitly project-only setup.
 5. Read [`plugins/nitpick/skills/nitpick/SKILL.md`](plugins/nitpick/skills/nitpick/SKILL.md) and follow it.
 
 ## Install per harness
@@ -46,9 +47,14 @@ Or for one session without installing: `claude --plugin-dir /path/to/nitpick-ski
 ```bash
 codex plugin marketplace add LVTD-LLC/nitpick-skills
 codex plugin add nitpick@nitpick-skills
+nitpick watch install codex --global
 ```
 
-Or open `/plugins` in a Codex session and install **nitpick** from the browser. Codex runs plugin hooks only after you trust them: run `/hooks` once in a session. Codex also reads skills from `~/.agents/skills/`, so `./install.sh` works as an alternative; add the hooks with `nitpick watch install codex`.
+Or open `/plugins` and install **nitpick**. The plugin installs the skill, but hook discovery from its manifest is not reliable across Codex versions; use the explicit global command above. Restart Codex and enable **and** trust the four entries under **User config** in `/hooks` or the desktop Hooks settings. Codex controls the group title; each new hook includes a descriptive `statusMessage`.
+
+`./install.sh --hooks codex --global` is an alternative that links the skill and installs the same hooks. Installation preserves existing hook definitions and unrelated hooks. It does not grant trust or enable previously disabled entries.
+
+Verify a fresh session in another workspace: an edit should lead to a completed review in `nitpick watch status`; findings should arrive through the next hook. A successful terminal review only proves terminal credentials, and `enabled: yes` only describes nitpick's settings. Do not claim background review is active until the actual harness has fired its hooks and a model has answered.
 
 ### Cursor
 

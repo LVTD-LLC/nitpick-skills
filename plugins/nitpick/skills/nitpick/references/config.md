@@ -44,8 +44,8 @@ debounce_secs = 20        # quiet period after the last edit before a review sta
 max_wait_secs = 120       # review anyway once edits have been arriving for this long
 timeout_secs = 180
 # budget_tokens = 40000
-# stop_wait_secs = 120    # how long the stop hook waits for a review in flight
-# max_stop_blocks = 2     # how many times in a row the stop hook may send the agent back
+# stop_wait_secs = 120    # only used when max_stop_blocks > 0; ignored in advisory mode
+# max_stop_blocks = 0     # advisory: never wait or block; set to 2 for a completion gate
 # instructions = "Extra instructions for the background reviewer only."
 ```
 
