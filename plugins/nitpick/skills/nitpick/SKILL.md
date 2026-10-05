@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires git and the nitpick binary (installs via Homebrew or cargo). Needs NITPICK_OPENROUTER_API_KEY, or a local Ollama / llama.cpp server.
 metadata:
   author: LVTD-LLC
-  version: "0.2.0"
+  version: "0.3.0"
   homepage: https://nitpick.sh
 ---
 
@@ -21,7 +21,9 @@ It also runs by itself. With `nitpick watch` installed into this harness's hooks
 nitpick --version
 ```
 
-If that fails, install it. Prefer Homebrew; fall back to cargo. Do not build from a git clone by hand.
+For setup or upgrade requests, also check `nitpick watch --help` and the current package-manager version. Upgrade an older installation with `brew update && brew upgrade nitpick`, or rerun `cargo install --git https://github.com/LVTD-LLC/nitpick --force`. A successful `--version` alone does not prove it is current.
+
+If the binary is absent, install it. Prefer Homebrew; fall back to cargo. Do not build from a git clone by hand.
 
 ```bash
 brew install LVTD-LLC/tap/nitpick      # macOS or Linux with Homebrew
@@ -35,10 +37,11 @@ If neither `brew` nor `cargo` exists, tell the user which one to install and sto
 nitpick needs one of:
 
 - `NITPICK_OPENROUTER_API_KEY` or `OPENROUTER_API_KEY` in the environment (OpenRouter, the default provider).
+- `api_key` in the user-level nitpick config (especially for GUI-launched hooks; see section 6).
 - A local server: `--provider ollama` (http://localhost:11434) or `--provider llamacpp` (http://localhost:8080), no key needed.
 - Any OpenAI-compatible endpoint: `--provider openai --base-url <url>` with `NITPICK_API_KEY`.
 
-If no key is set and no local server is running, ask the user for a key or a provider. Never paste a key into a file or a commit; export it in the shell or let the user add it to their shell profile.
+If no key is set and no local server is running, ask the user for a key or a provider. Never print a key or commit it. Shell exports work for terminal sessions; section 6 covers a secure user-level config for GUI hooks.
 
 ## 3. Run the review
 
@@ -84,20 +87,27 @@ Then fill in `instructions` with the project's conventions (framework, what to b
 
 ## 6. Background review (`nitpick watch`)
 
-When installed, the harness calls `nitpick hook <harness> <event>` from its own lifecycle hooks. After each tool call the hook records the edit and starts a detached worker; the worker waits for ~20 seconds of quiet, diffs each changed file against the copy it reviewed last time, reviews that small diff, and queues findings at or above `medium`. The next hook hands them to you as a `[nitpick]` note. When you try to finish, a stop hook reviews whatever is left and sends you back once or twice if anything is `high` or `blocker`. Nothing is asked of you until a note appears.
+When installed, the harness calls `nitpick hook <harness> <event>` from its own lifecycle hooks. After each tool call the hook records the edit and starts a detached worker; the worker waits for ~20 seconds of quiet, diffs each changed file against the copy it reviewed last time, reviews that small diff, and queues findings at or above `medium`. The next hook hands them to you as a `[nitpick]` note. When you finish, the stop hook schedules remaining work and returns immediately. Reviews never wait or block by default; late findings wait for the next prompt or tool call. Set `[watch].max_stop_blocks = 2` to opt into a blocking completion gate. Nothing is asked of you until a note appears.
 
 **When a `[nitpick]` note appears:** finish the step you are on. Then read each finding: it cites `path:line` in the current file, says what is wrong, and usually suggests a fix. It comes from a different model and can be wrong, so check it against the code before changing anything. Fix the real ones; for a wrong one, say so in one line and move on. Do not stop to re-run anything; the next batch of edits is reviewed the same way.
 
-**When the stop hook sends you back:** the note lists only findings at or above the stop threshold. Fix each, or state in one line why it is wrong, then finish again. The hook gives up after two rounds, so this cannot loop forever.
+**When an opt-in stop gate sends you back:** the note lists only findings at or above the stop threshold. Fix each, or state in one line why it is wrong, then finish again. The hook gives up after two rounds, so this cannot loop forever.
 
-**Setting it up** (if the Claude Code or Codex plugin is installed, the hooks are already there; Codex users must trust them once with `/hooks`):
+**Setting it up globally in Codex:**
 
 ```bash
-nitpick watch install claude      # or codex, cursor, pi, opencode, openclaw; add --global for every repo
-nitpick watch status              # on or off, worker state, what is waiting, recent activity
+nitpick watch install codex --global
 ```
 
-The install writes into the harness's hook file in this repo (`.claude/settings.json`, `.codex/hooks.json`, `.cursor/hooks.json`, `.pi/extensions/`, `.opencode/plugins/`, `.openclaw/extensions/`). Mention to the user that these files exist and let them decide whether to commit them. If `nitpick watch status` says a review failed, the usual cause is a missing API key in the hook's environment; `~/.config/nitpick/config.toml` with `api_key = "..."` fixes that for GUI-launched agents (ask the user to write it; never write a key yourself).
+Run this even when the Codex plugin is installed: plugin installation alone has not reliably registered the hooks. Restart Codex and have the user enable **and** trust all four entries under **User config** in `/hooks` or the desktop Hooks settings. Never bypass hook trust or write approval hashes. Keep one active set; disable plugin duplicates or remove project-local duplicates with `nitpick watch uninstall codex` after global activation. Existing definitions are preserved on reinstall to retain trust.
+
+For other harnesses, use `nitpick watch install <harness> --global` (Claude Code already loads the plugin hooks). Omit `--global` only when the user explicitly wants one workspace; that writes project files such as `.codex/hooks.json`. Explain which scope was installed.
+
+GUI-launched hooks may lack the shell API key. Use `api_key = "..."` in the user-level `~/.config/nitpick/config.toml`, with owner-only permissions (`chmod 600`). Ask the user to configure it, or obtain explicit permission before securely saving an existing key. Never print keys or save them in a repo. Prefer a free model in the user-level `[watch]` table for global background review.
+
+Verify in a fresh session in another workspace: an edit must produce a completed model review in `nitpick watch status`. A planted test bug can verify finding delivery; remove it afterward. `enabled: yes`, a worker starting, and a successful terminal review are not proof of automatic review. If hooks are trusted but disabled, activation is still incomplete. Provider errors are not a passing review; report any unverified step honestly.
+
+Watch also works outside Git: it baselines source files in the hook working folder and sends only changed code, without related context. It skips hidden/ignored files, generated directories, symlinks, and nested repositories. State is stored under `~/.local/state/nitpick/workspaces/`. Files outside that folder are not watched.
 
 Other useful commands: `nitpick watch log` (every past background finding), `nitpick watch run` (review everything unreviewed right now, in the foreground), `nitpick watch reset`, `NITPICK_WATCH=0` to turn it off for a session. Tune `debounce_secs`, `deliver`, `fail_on`, `model` in the `[watch]` section of `.nitpick.toml`; a free model is a reasonable choice there since reviews are small and frequent.
 

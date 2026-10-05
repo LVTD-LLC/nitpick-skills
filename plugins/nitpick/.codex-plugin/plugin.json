@@ -1,6 +1,6 @@
 {
   "name": "nitpick",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "AI code review for AI agents: a background reviewer that checks the agent's edits as it works, plus a skill to run nitpick before opening a PR and loop until the review is clean.",
   "author": { "name": "LVTD LLC", "url": "https://lvtd.dev" },
   "homepage": "https://nitpick.sh",

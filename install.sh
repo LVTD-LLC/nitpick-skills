@@ -28,7 +28,7 @@ skill_src="$here/plugins/nitpick/skills/nitpick"
 
 if [ "$want_binary" = 1 ]; then
   if command -v nitpick >/dev/null 2>&1; then
-    echo "nitpick already installed: $(nitpick --version)"
+    echo "nitpick already installed: $(nitpick --version) (not upgraded; use your package manager to check for updates)"
   elif command -v brew >/dev/null 2>&1; then
     echo "installing nitpick with Homebrew (builds from source, a few minutes)..."
     brew install LVTD-LLC/tap/nitpick
@@ -56,6 +56,10 @@ if [ "$want_skill" = 1 ]; then
 fi
 
 if [ "${#hooks[@]}" -gt 0 ]; then
+  if ! nitpick watch --help >/dev/null 2>&1; then
+    echo "nitpick watch is unavailable. Install or upgrade nitpick, then rerun this installer." >&2
+    exit 1
+  fi
   for h in "${hooks[@]}"; do
     if [ "$want_global" = 1 ]; then nitpick watch install "$h" --global; else nitpick watch install "$h"; fi
   done
@@ -63,10 +67,15 @@ fi
 
 echo
 if [ -z "${NITPICK_OPENROUTER_API_KEY:-}" ] && [ -z "${OPENROUTER_API_KEY:-}" ]; then
-  echo "next: export NITPICK_OPENROUTER_API_KEY=<your OpenRouter key>, or use --provider ollama."
+  echo "provider access unverified: use a shell API-key export, owner-only ~/.config/nitpick/config.toml for GUI hooks, or a local provider."
 else
-  echo "ready. Run 'nitpick' inside any git repo with changes."
+  echo "terminal API key detected; GUI hook credentials and automatic review still need verification."
 fi
 if [ "${#hooks[@]}" -eq 0 ]; then
-  echo "to review in the background while an agent works: nitpick watch install <claude|codex|cursor|pi|opencode|openclaw> [--global]"
+  echo "for global background review: nitpick watch install <claude|codex|cursor|pi|opencode|openclaw> --global"
+fi
+
+echo "Claude Code with its plugin installed: verify the plugin hooks instead of adding duplicate global hooks."
+if [ "${#hooks[@]}" -gt 0 ]; then
+  echo "Verify a completed background review after an edit in a fresh session; installation is not activation."
 fi
