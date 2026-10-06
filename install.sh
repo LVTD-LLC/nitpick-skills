@@ -2,7 +2,7 @@
 # Installs the nitpick binary, links the nitpick skill where AI coding agents
 # look for skills, and optionally installs the background-review hooks for a
 # harness. Safe to rerun. Flags: --no-binary, --no-skill, --hooks <harness>
-# (claude|codex|cursor|pi|opencode|openclaw; repeatable), --global.
+# (codex|cursor|pi|opencode|openclaw; repeatable), --global.
 set -euo pipefail
 
 want_binary=1
@@ -61,6 +61,11 @@ if [ "${#hooks[@]}" -gt 0 ]; then
     exit 1
   fi
   for h in "${hooks[@]}"; do
+    if [ "$h" = claude ]; then
+      echo "Claude Code: skipped; install the plugin instead, it carries the hooks:"
+      echo "  claude plugin marketplace add LVTD-LLC/nitpick-skills && claude plugin install nitpick@nitpick-skills"
+      continue
+    fi
     if [ "$want_global" = 1 ]; then nitpick watch install "$h" --global; else nitpick watch install "$h"; fi
   done
 fi
@@ -72,10 +77,10 @@ else
   echo "terminal API key detected; GUI hook credentials and automatic review still need verification."
 fi
 if [ "${#hooks[@]}" -eq 0 ]; then
-  echo "for global background review: nitpick watch install <claude|codex|cursor|pi|opencode|openclaw> --global"
+  echo "for background review: nitpick watch install <codex|cursor|pi|opencode|openclaw> --global"
+  echo "(Claude Code: install the plugin instead; it carries the hooks)"
 fi
 
-echo "Claude Code with its plugin installed: verify the plugin hooks instead of adding duplicate global hooks."
 if [ "${#hooks[@]}" -gt 0 ]; then
   echo "Verify a completed background review after an edit in a fresh session; installation is not activation."
 fi

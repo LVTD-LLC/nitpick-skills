@@ -12,24 +12,13 @@ This repository is one plugin directory that is valid in every format at once:
 | Claude Code plugin + marketplace | `plugins/nitpick/.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` | Claude Code, claude.ai, Cowork |
 | Codex plugin + marketplace | `plugins/nitpick/.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json` | Codex CLI and app |
 | Cursor plugin + marketplace | `plugins/nitpick/.cursor-plugin/plugin.json`, `.cursor-plugin/marketplace.json` | Cursor |
-| [Agent Skills](https://agentskills.io) | `plugins/nitpick/skills/nitpick/SKILL.md` | every harness above, plus OpenCode and any skills-aware agent |
+| [Agent Skills](https://agentskills.io) | `plugins/nitpick/skills/nitpick/SKILL.md`, `plugins/nitpick/skills/nitpick-setup/SKILL.md` | every harness above, plus OpenCode and any skills-aware agent |
 
 Hooks are harness-specific and live in `plugins/nitpick/hooks/`: `hooks.json` (Claude Code), `codex-hooks.json` (Codex, referenced from its manifest), `cursor-hooks.json` (Cursor). Each entry just runs `nitpick hook <harness> <event>`; the binary does the rest. For pi, OpenCode and OpenClaw the binary itself installs a small extension: `nitpick watch install pi` and so on.
 
 ## If you are an AI agent
 
-Do these in order.
-
-1. Check `nitpick --version` and `nitpick watch --help`. Install the binary if absent:
-   ```bash
-   brew install LVTD-LLC/tap/nitpick
-   ```
-   or, without Homebrew, `cargo install --git https://github.com/LVTD-LLC/nitpick` (needs Rust 1.98+).
-   If already installed, check for an upgrade with your package manager (`brew update && brew upgrade nitpick` for Homebrew, or rerun `cargo install --git https://github.com/LVTD-LLC/nitpick --force`). A working old binary is not necessarily current.
-2. Install this skill into your harness using the matching section below, or run `./install.sh` from a clone of this repo, which does step 1 and links the skill into `~/.agents/skills/` and `~/.claude/skills/`.
-3. Configure provider access for the hook environment. GUI apps may not inherit shell exports: the user-level `~/.config/nitpick/config.toml` supports `api_key`, with file mode `600`. Ask the user to configure it, or obtain explicit permission before securely saving an existing key; never print it or put it in a repository. A local Ollama / llama.cpp server needs no key.
-4. For Codex, explicitly run `nitpick watch install codex --global`, even after plugin installation. Restart Codex and enable AND trust the four hooks under **User config** in `/hooks` or desktop Hooks settings. Use one active set; disable plugin duplicates or uninstall project-local duplicates after global activation. For other harnesses use `nitpick watch install <harness> --global` (Claude Code already loads the plugin hooks). Omit `--global` only for an explicitly project-only setup.
-5. Read [`plugins/nitpick/skills/nitpick/SKILL.md`](plugins/nitpick/skills/nitpick/SKILL.md) and follow it.
+Follow [`plugins/nitpick/skills/nitpick-setup/SKILL.md`](plugins/nitpick/skills/nitpick-setup/SKILL.md) to install and set up nitpick, then use [`plugins/nitpick/skills/nitpick/SKILL.md`](plugins/nitpick/skills/nitpick/SKILL.md) to review.
 
 ## Install per harness
 
@@ -40,7 +29,7 @@ claude plugin marketplace add LVTD-LLC/nitpick-skills
 claude plugin install nitpick@nitpick-skills
 ```
 
-Or for one session without installing: `claude --plugin-dir /path/to/nitpick-skills/plugins/nitpick`. The skill is then available as `/nitpick:nitpick` and Claude also uses it on its own when a review is called for. The plugin's hooks start reviewing in the background from the first edit.
+Or for one session without installing: `claude --plugin-dir /path/to/nitpick-skills/plugins/nitpick`. The skill is then available as `/nitpick:nitpick` and Claude also uses it on its own when a review is called for. The plugin's hooks start reviewing in the background from the first edit; do not also run `nitpick watch install claude`, which would register them twice.
 
 ### OpenAI Codex
 

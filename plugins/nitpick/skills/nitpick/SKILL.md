@@ -1,11 +1,11 @@
 ---
 name: nitpick
-description: Get an independent AI code review of your changes with the nitpick CLI (a different model on OpenRouter or a local model, with repo context pulled in automatically). Two modes. On demand: run `nitpick` after finishing a change, before committing or creating a PR, when the user asks to "review my changes", "run nitpick", or "get a second opinion on this diff". In the background: `nitpick watch` hooks into this harness and reviews each batch of edits while you work, delivering findings as "[nitpick]" notes; use this skill when such a note appears, when the user asks to "set up nitpick watch" or "review in the background", or to check `nitpick watch status`. Also covers installing nitpick and fixing a failed review.
+description: Get an independent AI code review of your changes with the nitpick CLI (a different model on OpenRouter or a local model, with repo context pulled in automatically). Two modes. On demand: run `nitpick` after finishing a change, before committing or creating a PR, when the user asks to "review my changes", "run nitpick", or "get a second opinion on this diff". In the background: `nitpick watch` hooks into this harness and reviews each batch of edits while you work, delivering findings as "[nitpick]" notes; use this skill when such a note appears, or to check `nitpick watch status`. Also covers installing nitpick and fixing a failed review.
 license: MIT
 compatibility: Requires git and the nitpick binary (installs via Homebrew or cargo). Needs NITPICK_OPENROUTER_API_KEY, or a local Ollama / llama.cpp server.
 metadata:
   author: LVTD-LLC
-  version: "0.3.0"
+  version: "0.3.1"
   homepage: https://nitpick.sh
 ---
 
@@ -93,19 +93,7 @@ When installed, the harness calls `nitpick hook <harness> <event>` from its own 
 
 **When an opt-in stop gate sends you back:** the note lists only findings at or above the stop threshold. Fix each, or state in one line why it is wrong, then finish again. The hook gives up after two rounds, so this cannot loop forever.
 
-**Setting it up globally in Codex:**
-
-```bash
-nitpick watch install codex --global
-```
-
-Run this even when the Codex plugin is installed: plugin installation alone has not reliably registered the hooks. Restart Codex and have the user enable **and** trust all four entries under **User config** in `/hooks` or the desktop Hooks settings. Never bypass hook trust or write approval hashes. Keep one active set; disable plugin duplicates or remove project-local duplicates with `nitpick watch uninstall codex` after global activation. Existing definitions are preserved on reinstall to retain trust.
-
-For other harnesses, use `nitpick watch install <harness> --global` (Claude Code already loads the plugin hooks). Omit `--global` only when the user explicitly wants one workspace; that writes project files such as `.codex/hooks.json`. Explain which scope was installed.
-
-GUI-launched hooks may lack the shell API key. Use `api_key = "..."` in the user-level `~/.config/nitpick/config.toml`, with owner-only permissions (`chmod 600`). Ask the user to configure it, or obtain explicit permission before securely saving an existing key. Never print keys or save them in a repo. Prefer a free model in the user-level `[watch]` table for global background review.
-
-Verify in a fresh session in another workspace: an edit must produce a completed model review in `nitpick watch status`. A planted test bug can verify finding delivery; remove it afterward. `enabled: yes`, a worker starting, and a successful terminal review are not proof of automatic review. If hooks are trusted but disabled, activation is still incomplete. Provider errors are not a passing review; report any unverified step honestly.
+**Setting it up:** follow the `nitpick-setup` skill (in this plugin, or https://raw.githubusercontent.com/LVTD-LLC/nitpick-skills/main/plugins/nitpick/skills/nitpick-setup/SKILL.md). In short: in Claude Code the plugin already carries the hooks, so never also run `nitpick watch install claude`; in Codex run `nitpick watch install codex --global` and have the user enable and trust the hooks; elsewhere `nitpick watch install <harness> --global`. Background hooks need the key in `~/.config/nitpick/config.toml` (mode 600), since GUI apps may not see shell exports. Do not call it active until `nitpick watch status` shows a completed review after an edit in a fresh session.
 
 Watch also works outside Git: it baselines source files in the hook working folder and sends only changed code, without related context. It skips hidden/ignored files, generated directories, symlinks, and nested repositories. State is stored under `~/.local/state/nitpick/workspaces/`. Files outside that folder are not watched.
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "nitpick",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "AI code review for AI agents: a background reviewer that checks the agent's edits as it works, plus a skill to run nitpick before opening a PR and loop until the review is clean.",
   "author": { "name": "LVTD LLC", "url": "https://lvtd.dev" },
   "homepage": "https://nitpick.sh",
